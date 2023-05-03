@@ -6,7 +6,7 @@ OrbitalPartitioning
 
 
 A short description of the project (less than one line).
-
+ 
 ### Copyright
 
 Copyright (c) 2023, Nick Mayhall
