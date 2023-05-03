@@ -1,8 +1,11 @@
 import numpy as np
 import scipy
 
+def spade_partitioning(Cocc, Pv, S):
+    pass
 
-def spade_partitioning(orbitals_blocks, Pv, S):
+
+def svd_subspace_partitioning(orbitals_blocks, Pv, S):
     """
     Find orbitals that most strongly overlap with the projector, P,  by doing rotations within each orbital block. 
     [C1, C2, C3] -> [(C1f, C2f, C3f), (C1e, C2e, C3e)]

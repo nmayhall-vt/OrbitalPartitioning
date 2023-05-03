@@ -5,8 +5,49 @@ OrbitalPartitioning
 [![codecov](https://codecov.io/gh/nmayhall-vt/OrbitalPartitioning/branch/main/graph/badge.svg)](https://codecov.io/gh/nmayhall-vt/OrbitalPartitioning/branch/main)
 
 
-A short description of the project (less than one line).
- 
+
+A very simple package that contains a few functions that perform SVD-based orbital rotations. This doesn't depend on any particular electronic structure theory packages, only numpy/scipy. 
+
+## Function: `spade_partitioning` (NYI)
+In SPADE [(ref)](https://pubs.acs.org/doi/10.1021/acs.jctc.8b01112), the occupied space is partitioned into two smaller spaces:
+1. the `fragment` space: 
+the orbitals that most strongly overlaps with a user specified set of atoms (or rather their basis functions). This is computed by performing an SVD of the projection of the occupied orbitals onto the specified AOs. The `fragment` orbitals are thus the span of the projected AO's. In the original paper, we also truncated the number of orbitals we keep, by dividing at the largest gap in the singular values. 
+2. the `environment` space: 
+the remaining orbitals. This includes not only the null space of the projected occupied orbitals, but also any singular vectors discarded from the `fragment` space. 
+
+example usage:
+
+    C_frag, C_env = spade_partitioning(C_occ, P, S)
+
+where:
+- `C_occ` is a numpy matrix of the occupied MO coefficients, $C_{\mu,i}$
+- `P` is a AO x nfrag projection matrix (really it's the span of the projection matrix) that defines the AO's to project onto, defining the fragment. For typical cases, this will just be selected columns of the $S^{1/2}_{\mu\nu}$ matrix, indicating that the occupied space is being projected onto the symetrically orthogonalized AOs. Keeping only columns of the identity matrix corresponds to projection onto the non-orthogonal AOs. 
+- `S` is the AO x AO overlap matrix. 
+
+## Function: `svd_subspace_partioning`
+Find orbitals that most strongly overlap with the projector, `P`,  by doing rotations within each orbital block. This function will split a list of Orbital Spaces up into separate `fragment` and `environment` blocks, _while maintiaing the same number of fragment orbitals as specified by the projector_. 
+
+For example, if we have 3 orbital blocks, say the occupied, singly, and virtual orbitals, 
+
+    CF, CE  = spade_partitioning([Cocc, Csing, Cvirt], P, S)
+    (Cocc_f, Csing_f,  Cvirt_f) = CF
+    (Cocc_e, Csing_e,  Cvirt_e) = CE
+
+However, instead of simply running `spade_partitioning` 3 separate times, this function above, keeps only the largest singular values across all subspaces, so that the number of columns in each of the `CF` blocks is equal to the number for fragment orbitals (i.e., the rank of the projector).
+
+## Function: `sym_ortho`
+
+Symmetrically orthogonalize list of MO coefficients. E.g., 
+
+
+    [C1, C2, C3, ... ] = sym_ortho([C1, C2, C3, ...], S, thresh=1e-8):
+    
+where each `Cn` matrix is a set of MO vectors in the AO basis, $C_{\mu,p}$. 
+
+
+## Function: `DMET_partitioning` (NYI)
+
+---
 ### Copyright
 
 Copyright (c) 2023, Nick Mayhall

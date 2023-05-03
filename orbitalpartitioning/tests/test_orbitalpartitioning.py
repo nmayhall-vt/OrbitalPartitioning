@@ -38,7 +38,7 @@ def test1():
     for fi,f in enumerate(frags):
         print()
         print(" Fragment: ", f)
-        (Of, Sf, Vf), (_, _, _) = orbitalpartitioning.spade_partitioning((Cdocc, Csing, Cvirt), Pf[fi], S)
+        (Of, Sf, Vf), (_, _, _) = orbitalpartitioning.svd_subspace_partitioning((Cdocc, Csing, Cvirt), Pf[fi], S)
         Cfrags.append(np.hstack((Of, Sf, Vf)))
         ndocc_f = Of.shape[1]
         init_fspace.append((ndocc_f+Sf.shape[1], ndocc_f))
