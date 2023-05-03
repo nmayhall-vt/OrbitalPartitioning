@@ -19,7 +19,7 @@ def test_orbitalpartitioning_imported():
 
 
 def test1():
-    with open('test_data/data_CrOCr.pickle', 'rb') as handle:
+    with open('orbitalpartitioning/tests/test_data/data_CrOCr.pickle', 'rb') as handle:
         data = pickle.load(handle)
 
 
