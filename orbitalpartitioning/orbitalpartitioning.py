@@ -73,91 +73,6 @@ def spade_partitioning(orbitals_blocks, Pv, S):
     return Cf, Ce 
 
 
-def spade_partitioning_rhf(O, U, Pv, S):
-    """
-    Find orbitals that most strongly overlap with the projector, P,  by doing O-O and V-V rotations. 
-    [O,U] -> Of, Uf, Oe, Ue
-    where Of (Uf) and Oe (Ue) are the Occupied (Unoccupied) orbitals of the fragment and environment, respectively.
-    
-    P[AO, frag]
-    O[AO, occupied]
-    U[AO, virtual]
-    """
-
-
-    assert(O.shape[0] == U.shape[0])
-    assert(Pv.shape[0] == U.shape[0])
-    assert(S.shape[0] == U.shape[0])
-    
-    nbas = O.shape[0]
-    nmo = O.shape[1] + U.shape[1]
-
-    print(" Partition %4i occupied and %4i virtual orbitals into a total of %4i orbitals" %(O.shape[1], U.shape[1], Pv.shape[1]))
-    PS = Pv.T @ S @ Pv
-
-    P = Pv @ np.linalg.inv(PS) @ Pv.T
-
-    #print(np.linalg.det(P.T @ S @ P))
-    # assert(np.isclose(np.abs(np.linalg.det(P.T @ S @ P)), 1.0))
-    nfrag = Pv.shape[1]
-
-    _,so,Vo = np.linalg.svd(P @ S @ O, full_matrices=True)
-    _,su,Vu = np.linalg.svd(P @ S @ U, full_matrices=True)
-
-    s = np.concatenate((so, su))
-    inds = [] 
-    for i in range(len(so)):
-        inds.append(i+1)
-    for i in range(len(su)):
-        inds.append(-i-1)
-    inds = np.array(inds)
-
-    spaces = ["O" for i in range(O.shape[1])]
-    spaces.extend(["V" for i in range(U.shape[1])])
-    spaces = np.array(spaces)
-
-    perm = np.argsort(s)[::-1]
-    inds = inds[perm]
-    s = s[perm]
-    spaces = spaces[perm]
-
-    Crot = np.hstack((O @ Vo.T, U @ Vu.T))
-    Crot = Crot[:,perm]    
-
-    # print(" %16s %12s %12s" %("Singular Value", "Occupied", "Virtual"))
-    # for i in range(nfrag):
-    #     print(" %16i %12.8f %12.8f" %(i, so[i], su[i]))
-
-
-    Of = np.zeros((nbas, 0))
-    Oe = np.zeros((nbas, 0))
-    Uf = np.zeros((nbas, 0))
-    Ue = np.zeros((nbas, 0))
-
-    # print(" %16s %12s %12s" %("--", "--", "--"))
-    print(" %16s %12s %-12s" %("Index", "Sing. Val.", "Space"))
-    for i in range(nfrag):
-        print(" %16i %12.8f %12s*" %(i, s[i], spaces[i]))
-        if spaces[i] == "O":
-            Of = np.hstack((Of, Crot[:,i:i+1]))
-        elif spaces[i] == "V":
-            Uf = np.hstack((Uf, Crot[:,i:i+1]))
-        else:
-            error("ArithmeticError")
-    
-
-    for i in range(nfrag, nmo):
-        if s[i] > 1e-6:
-            print(" %16i %12.8f %12s" %(i, s[i], spaces[i]))
-        if spaces[i] == "O":
-            Oe = np.hstack((Oe, Crot[:,i:i+1]))
-        elif spaces[i] == "V":
-            Ue = np.hstack((Ue, Crot[:,i:i+1]))
-        else:
-            error("ArithmeticError")
-
-
-    return  Of, Uf, Oe, Ue
 
 
 def sym_ortho(frags, S, thresh=1e-8):
@@ -193,4 +108,4 @@ def sym_ortho(frags, S, thresh=1e-8):
 
 if __name__ == "__main__":
     # Do something if this file is invoked on its own
-    print(canvas())
+    pass
