@@ -9,6 +9,7 @@ dependencies:
   - python
   - pip
   - numpy
+  - scipy 
 
     # Testing
   - pytest
