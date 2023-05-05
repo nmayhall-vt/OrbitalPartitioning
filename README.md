@@ -29,7 +29,7 @@ Find orbitals that most strongly overlap with the projector, `P`,  by doing rota
 
 For example, if we have 3 orbital blocks, say the occupied, singly, and virtual orbitals, 
 
-    CF, CE  = spade_partitioning([Cocc, Csing, Cvirt], P, S)
+    CF, CE  = svd_subspace_partitioning([Cocc, Csing, Cvirt], P, S)
     (Cocc_f, Csing_f,  Cvirt_f) = CF
     (Cocc_e, Csing_e,  Cvirt_e) = CE
 
