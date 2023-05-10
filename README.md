@@ -8,7 +8,7 @@ OrbitalPartitioning
 
 A very simple package that contains a few functions that perform SVD-based orbital rotations. This doesn't depend on any particular electronic structure theory packages, only numpy/scipy. 
 
-## Function: `svd_subspace_partioning`
+## Function: `svd_subspace_partitioning`
 Find orbitals that most strongly overlap with the projector, `P`,  by doing rotations within each orbital block. This function will split a list of Orbital Spaces up into separate `fragment` and `environment` blocks, _while maintiaing the same number of fragment orbitals as specified by the projector_. 
 
 For example, if we have 3 orbital blocks, say the occupied, singly, and virtual orbitals, 
