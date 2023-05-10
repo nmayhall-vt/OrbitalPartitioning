@@ -58,3 +58,18 @@ def test1():
     assert(init_fspace == data["init_fspace"])
     assert(clusters == data["clusters"])
 
+
+    # canonicalize
+    # let's just assume S is our fock matrix for now
+    F = S
+    Cfrags = orbitalpartitioning.canonicalize(Cfrags, F)
+    [print(i.shape) for i in Cfrags]
+    env, act, vir = orbitalpartitioning.extract_frontier_orbitals(Cfrags, F, [(1,4,1), (1,2,1), (1,4,1)])
+
+    [print(i.shape) for i in env]
+    [print(i.shape) for i in act]
+    [print(i.shape) for i in vir]
+
+
+if __name__ == "__main__":
+    test1()

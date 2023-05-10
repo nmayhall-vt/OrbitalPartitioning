@@ -4,6 +4,42 @@ import scipy
 def spade_partitioning(Cocc, Pv, S):
     pass
 
+def canonicalize(orbital_blocks, F):
+    """
+    Given an AO Fock matrix, rotate each orbital block in `orbital_blocks` to diagonalize F
+    """
+    out = []
+    for obi, ob in enumerate(orbital_blocks):
+        fi = ob.T @ F @ ob
+        fi = .5 * ( fi + fi.T )
+        e, U =  np.linalg.eig(fi)
+        out.append(ob @ U)
+    return out
+
+def extract_frontier_orbitals(orbital_blocks, F, dims):
+    """
+    Given an AO Fock matrix, split each orbital block into 3 spaces, NDocc, NAct, Nvirt
+
+    `dims` = [(NDocc, NAct, Nvirt), (NDocc, NAct, Nvirt), ... ]
+    `F`: the fock matrix  
+    """
+    NAOs = F.shape[0]
+    tmp = canonicalize(orbital_blocks, F)
+    env_blocks = []
+    act_blocks = []
+    vir_blocks = []
+    for obi, ob in enumerate(tmp):
+        assert(ob.shape[0] == NAOs)
+        env_blocks.append(np.zeros((NAOs, 0)))
+        act_blocks.append(np.zeros((NAOs, 0)))
+        vir_blocks.append(np.zeros((NAOs, 0)))
+    for obi, ob in enumerate(tmp):
+        assert(np.sum(dims[obi]) == ob.shape[1])
+        env_blocks[obi] = ob[:,0:dims[obi][0]]
+        act_blocks[obi] = ob[:,dims[obi][0]:dims[obi][0]+dims[obi][1]]
+        vir_blocks[obi] = ob[:,dims[obi][0]+dims[obi][1]:dims[obi][0]+dims[obi][1]+dims[obi][2]]
+
+    return env_blocks, act_blocks, vir_blocks
 
 def svd_subspace_partitioning(orbitals_blocks, Pv, S):
     """
