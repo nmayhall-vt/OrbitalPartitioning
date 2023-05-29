@@ -71,5 +71,28 @@ def test1():
     [print(i.shape) for i in vir]
 
 
+def test2():
+    with open('orbitalpartitioning/tests/data/data_CrOCr.pickle', 'rb') as handle:
+        data = pickle.load(handle)
+
+    Pf     = data["Pf"]      
+    Cdocc  = data["Cdocc"]   
+    Csing  = data["Csing"]   
+    Cvirt  = data["Cvirt"]   
+    S      = data["S"]       
+    frags  = data["frags"]       
+    init_fspace = []
+    clusters = []
+    Cfrags = []
+    orb_index = 1
+    
+    orbitals = orbitalpartitioning.dmet_clustering(Cdocc, Cvirt, frags, S)
+    
+    tmp = [i.shape[1] for i in orbitals]
+    ref = [57,12,8,12,271]
+    print(tmp, ref)
+    assert(tmp == ref)
+
 if __name__ == "__main__":
     test1()
+    test2()

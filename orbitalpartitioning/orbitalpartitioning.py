@@ -1,8 +1,86 @@
 import numpy as np
 import scipy
+import warnings
 
 def spade_partitioning(Cocc, Pv, S):
     pass
+
+
+def dmet_clustering(Cocc, Cvir, frags, S):
+    full = []
+    [full.extend(i) for i in frags]
+    nmo = Cocc.shape[1] + Cvir.shape[1]
+
+    Cenv_occ, Cact_occ, Cact_vir, Cenv_vir = dmet_active_space(Cocc, Cvir, full, S)
+    
+    nfrag = len(frags)
+    print(" Partition %4i orbitals into a total of %4i fragments" %(nmo, nfrag))
+
+    Clist = []
+
+    for f in frags:
+        _, fo, fv, _ = dmet_active_space(Cocc, Cvir, f, S)
+        Clist.append(np.hstack((fo,fv)))
+    
+    Clist = sym_ortho(Clist, S)
+
+    out = [Cenv_occ]
+    [out.append(i) for i in Clist]
+    out.append(Cenv_vir)
+
+    return out 
+
+def dmet_active_space(Cocc, Cvir, frag, S):
+        
+    X = scipy.linalg.sqrtm(S)
+    Xinv = np.linalg.inv(X)
+
+    nbas = S.shape[0]
+    assert(Cocc.shape[0] == nbas)
+    assert(Cvir.shape[0] == nbas)
+    nmo = Cocc.shape[1] + Cvir.shape[1]
+
+    nfrag = len(frag)
+
+    print(" Create DMET active space by projecting %4i MOs onto %4i fragment orbitals" %(nmo, nfrag))
+    # Occupieds
+    _,s,V = np.linalg.svd(Cocc[frag,:], full_matrices=True)
+    nocc = 0
+    for si in s:
+        if si > 1e-6:
+            nocc += 1
+        else:
+            warnings.warn("Small singular values")
+
+    Cact_occ = Cocc @ V[0:nocc,:].T
+    Cenv_occ = Cocc @ V[nocc:,:].T
+
+    # Virtuals
+    _,s,V = np.linalg.svd(Cvir[frag,:], full_matrices=True)
+    nocc = 0
+    for si in s:
+        if si > 1e-6:
+            nocc += 1
+        else:
+            warnings.warn("Small singular values")
+    Cact_vir = Cvir @ V[0:nocc,:].T
+    Cenv_vir = Cvir @ V[nocc:,:].T
+
+    # Un-Orthogonalize
+    Cact_occ = Xinv@Cact_occ
+    Cact_vir = Xinv@Cact_vir
+    Cenv_occ = Xinv@Cenv_occ
+    Cenv_vir = Xinv@Cenv_vir
+
+    # print(Cenv.shape, Cact_occ.shape, Cact_vir.shape)
+
+    print(" Dmet active space has the following dimensions:")
+    print("   Environment (occupied)   : %5i" % Cenv_occ.shape[1])
+    print("   Active (occupied)        : %5i" % Cact_occ.shape[1])
+    print("   Active (virtual)         : %5i" % Cact_vir.shape[1])
+    print("   Environment (virtual)    : %5i" % Cenv_vir.shape[1])
+    return Cenv_occ, Cact_occ, Cact_vir, Cenv_vir
+
 
 def canonicalize(orbital_blocks, F):
     """
