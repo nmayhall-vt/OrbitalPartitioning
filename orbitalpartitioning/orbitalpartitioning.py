@@ -11,6 +11,9 @@ def dmet_clustering(Cocc, Cvir, frags, S):
     [full.extend(i) for i in frags]
     nmo = Cocc.shape[1] + Cvir.shape[1]
 
+    init_fspace = [] # Number of electrons in each cluster
+    clusters = []
+
     Cenv_occ, Cact_occ, Cact_vir, Cenv_vir = dmet_active_space(Cocc, Cvir, full, S)
     
     nfrag = len(frags)
@@ -18,9 +21,18 @@ def dmet_clustering(Cocc, Cvir, frags, S):
 
     Clist = []
 
+    orb_idx = 0
     for f in frags:
         _, fo, fv, _ = dmet_active_space(Cocc, Cvir, f, S)
         Clist.append(np.hstack((fo,fv)))
+
+        ndocc_f = fo.shape[1]
+        init_fspace.append((ndocc_f, ndocc_f))
+
+        nmo_f = fo.shape[1] + fv.shape[1]
+        clusters.append(list(range(orb_idx, orb_idx+nmo_f)))
+        orb_idx += nmo_f
+
     
     Clist = sym_ortho(Clist, S)
 
@@ -28,12 +40,19 @@ def dmet_clustering(Cocc, Cvir, frags, S):
     [out.append(i) for i in Clist]
     out.append(Cenv_vir)
 
-    return out 
+    print(" init_fspace = ", init_fspace)
+    print(" clusters    = ", clusters)
 
-def dmet_active_space(Cocc, Cvir, frag, S):
+
+    return out, init_fspace, clusters
+
+def dmet_active_space(Cocc_in, Cvir_in, frag, S):
         
     X = scipy.linalg.sqrtm(S)
     Xinv = np.linalg.inv(X)
+
+    Cocc = X@Cocc_in
+    Cvir = X@Cvir_in
 
     nbas = S.shape[0]
     assert(Cocc.shape[0] == nbas)
@@ -71,6 +90,8 @@ def dmet_active_space(Cocc, Cvir, frag, S):
     Cact_vir = Xinv@Cact_vir
     Cenv_occ = Xinv@Cenv_occ
     Cenv_vir = Xinv@Cenv_vir
+
+    
 
     # print(Cenv.shape, Cact_occ.shape, Cact_vir.shape)
 

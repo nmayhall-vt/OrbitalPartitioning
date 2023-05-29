@@ -86,8 +86,14 @@ def test2():
     Cfrags = []
     orb_index = 1
     
-    orbitals = orbitalpartitioning.dmet_clustering(Cdocc, Cvirt, frags, S)
+    orbitals, init_fspace, clusters = orbitalpartitioning.dmet_clustering(Cdocc, Cvirt, frags, S)
     
+    Cfull = np.hstack((orbitals))
+    assert(Cfull.shape[1] == round(np.trace(Cfull @ Cfull.T @ S)))
+
+    Cfull = orbitals[0]
+    assert(Cfull.shape[1] == round(np.trace(Cfull @ Cfull.T @ S)))
+
     tmp = [i.shape[1] for i in orbitals]
     ref = [57,12,8,12,271]
     print(tmp, ref)
