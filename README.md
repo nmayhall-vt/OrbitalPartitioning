@@ -16,8 +16,28 @@ For example, if we have 3 orbital blocks, say the occupied, singly, and virtual 
     CF, CE  = svd_subspace_partitioning([Cocc, Csing, Cvirt], P, S)
     (Cocc_f, Csing_f,  Cvirt_f) = CF
     (Cocc_e, Csing_e,  Cvirt_e) = CE
+we will get back the list of fragment orbitals from each space, and a list of environment orbitals from each space. 
+This function above, keeps only the largest singular values across all subspaces, so that the number of columns in each of the `CF` blocks is equal to the number for fragment orbitals (i.e., the rank of the projector).
 
-However, instead of simply running `spade_partitioning` 3 separate times, this function above, keeps only the largest singular values across all subspaces, so that the number of columns in each of the `CF` blocks is equal to the number for fragment orbitals (i.e., the rank of the projector).
+## Function: `svd_subspace_partitioning_orth`
+Find orbitals that most strongly overlap with the list of **orthogonalized AOs** listed in `frag`,  by doing rotations within each orbital block. This function will split a list of Orbital Spaces up into separate `fragment` and `environment` blocks, _while maintiaing the same number of fragment orbitals as specified by the projector_. 
+
+For example, if we have 3 orbital blocks, say the occupied, singly, and virtual orbitals, 
+
+    CF, CE  = svd_subspace_partitioning([Cocc, Csing, Cvirt], frag, S)
+    (Cocc_f, Csing_f,  Cvirt_f) = CF
+    (Cocc_e, Csing_e,  Cvirt_e) = CE
+we will get back the list of fragment orbitals from each space, and a list of environment orbitals from each space. 
+
+## Function: `svd_subspace_partitioning_nonorth`
+Find orbitals that most strongly overlap with the list of **non-orthogonalized AOs** listed in `frag`,  by doing rotations within each orbital block. This function will split a list of Orbital Spaces up into separate `fragment` and `environment` blocks, _while maintiaing the same number of fragment orbitals as specified by the projector_. 
+
+For example, if we have 3 orbital blocks, say the occupied, singly, and virtual orbitals, 
+
+    CF, CE  = svd_subspace_partitioning([Cocc, Csing, Cvirt], frag, S)
+    (Cocc_f, Csing_f,  Cvirt_f) = CF
+    (Cocc_e, Csing_e,  Cvirt_e) = CE
+we will get back the list of fragment orbitals from each space, and a list of environment orbitals from each space. 
 
 ## Function: `sym_ortho`
 

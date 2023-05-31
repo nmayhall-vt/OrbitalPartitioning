@@ -165,10 +165,10 @@ def svd_subspace_partitioning(orbitals_blocks, Pv, S):
         nmo += i.shape[1]
 
 
-    print(" Partition %4i orbitals into a total of %4i orbitals" %(nmo, Pv.shape[1]))
-    PS = Pv.T @ S @ Pv
+    X = scipy.linalg.sqrtm(S)
 
-    P = Pv @ np.linalg.inv(PS) @ Pv.T
+    print(" Partition %4i orbitals into a total of %4i orbitals" %(nmo, Pv.shape[1]))
+    P = Pv @ np.linalg.inv(Pv.T @ S @ Pv) @ Pv.T
 
 
     s = []
@@ -177,7 +177,7 @@ def svd_subspace_partitioning(orbitals_blocks, Pv, S):
     Cf = []
     Ce = []
     for obi, ob in enumerate(orbitals_blocks):
-        _,sob,Vob = np.linalg.svd(P @ S @ ob, full_matrices=True)
+        _,sob,Vob = np.linalg.svd(X @ P @ S @ ob, full_matrices=True)
         s.extend(sob)
         Clist.append(ob @ Vob.T)
         spaces.extend([obi for i in range(ob.shape[1])])
@@ -207,8 +207,76 @@ def svd_subspace_partitioning(orbitals_blocks, Pv, S):
         block = spaces[i]
         Ce[block] = np.hstack((Ce[block], Ctot[:,i:i+1]))
 
+    print("  SVD active space has the following dimensions:")
+    print(" %14s %14s %14s" %("Orbital Block", "Environment", "Active"))
+    for obi,ob in enumerate(orbitals_blocks):
+        print(" %14i %14i %14i" %(obi, Ce[obi].shape[1], Cf[obi].shape[1]))
+        assert(abs(np.linalg.det(ob.T @ S @ ob)) > 1e-12)
 
     return Cf, Ce 
+
+def svd_subspace_partitioning_orth(orbitals_blocks, frag, S):
+    """
+    Find orbitals that most strongly overlap with the atomic orbitals listed in `frag` by doing rotations within each orbital block. 
+    [C1, C2, C3] -> [(C1f, C2f, C3f), (C1e, C2e, C3e)]
+    where C1f (C2f) and C1e (C2e) are the fragment orbitals in block 1 (2) and remainder orbitals in block 1 (2).
+
+    Common scenarios would be 
+        `orbital_blocks` = [Occ, Virt]
+        or 
+        `orbital_blocks` = [Occ, Sing, Virt]
+    
+    frag[ao1, ao2, ...] 
+    O[AO, occupied]
+    U[AO, virtual]
+
+    frag listed here are assumed to be orthogonalized AOs
+    """
+
+    print(" In svd_subspace_partitioning_orth")
+    nbas = S.shape[0]
+    assert(len(orbitals_blocks)) > 0
+
+    I = np.eye(nbas)
+
+    # Define projectors
+    X = scipy.linalg.sqrtm(S)
+    Xinv = np.linalg.inv(X)
+
+    # acts, envs = svd_subspace_partitioning([X@o for o in orbitals_blocks], X[:,frag], I)
+    # return [Xinv@o for o in acts], [Xinv@o for o in envs]
+    
+    return svd_subspace_partitioning(orbitals_blocks, X[:,frag], S)
+
+
+
+def svd_subspace_partitioning_nonorth(orbitals_blocks, frag, S):
+    """
+    Find orbitals that most strongly overlap with the atomic orbitals listed in `frags` by doing rotations within each orbital block. 
+    [C1, C2, C3] -> [(C1f, C2f, C3f), (C1e, C2e, C3e)]
+    where C1f (C2f) and C1e (C2e) are the fragment orbitals in block 1 (2) and remainder orbitals in block 1 (2).
+
+    Common scenarios would be 
+        `orbital_blocks` = [Occ, Virt]
+        or 
+        `orbital_blocks` = [Occ, Sing, Virt]
+    
+    frags[ao1, ao2, ...] 
+    O[AO, occupied]
+    U[AO, virtual]
+
+    NOTE: frags listed here are assumed to be the non-orthogonal AOs
+    """
+
+
+    print(" In svd_subspace_partitioning_nonorth")
+    nbas = S.shape[0]
+    assert(len(orbitals_blocks)) > 0
+
+    I = np.eye(nbas)
+
+    return svd_subspace_partitioning(orbitals_blocks, I[:,frag], S)
+
 
 
 

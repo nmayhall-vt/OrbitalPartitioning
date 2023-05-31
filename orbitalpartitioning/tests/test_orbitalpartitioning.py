@@ -47,6 +47,43 @@ def test1():
         orb_index += nmof
 
 
+    print(" ---------------------------------------------------------------- ")
+    Cfrags2 = []
+    orb_index = 1
+    for fi,f in enumerate(frags):
+        print()
+        print(" Fragment: ", f)
+        (Of, Sf, Vf), (_, _, _) = orbitalpartitioning.svd_subspace_partitioning_orth((Cdocc, Csing, Cvirt), f, S)
+        Cfrags2.append(np.hstack((Of, Sf, Vf)))
+        
+    ref = [ 1,1,1]    
+    test = [np.linalg.det(Cfrags[fi].T @ S @ Cfrags2[fi]) for fi,f in enumerate(frags)] 
+
+    for i in range(len(ref)):
+        assert(abs(test[i])-abs(ref[i]) < 1e-12)      
+    
+    for fi,f in enumerate(frags):
+        print(" Should be 1: ", np.linalg.det(Cfrags[fi].T @ S @ Cfrags2[fi]))
+    print(" ---------------------------------------------------------------- ")
+
+    print(" ---------------------------------------------------------------- ")
+    Cfrags2 = []
+    orb_index = 1
+    for fi,f in enumerate(frags):
+        print()
+        print(" Fragment: ", f)
+        (Of, Sf, Vf), (_, _, _) = orbitalpartitioning.svd_subspace_partitioning_nonorth((Cdocc, Csing, Cvirt), f, S)
+        Cfrags2.append(np.hstack((Of, Sf, Vf)))
+        
+    ref = [ 0.9639412220052649, -0.9867599366347694, -0.9639404218744322]    
+    test = [np.linalg.det(Cfrags[fi].T @ S @ Cfrags2[fi]) for fi,f in enumerate(frags)] 
+
+    for i in range(len(ref)):
+        assert(abs(test[i])-abs(ref[i]) < 1e-12) 
+
+    for fi,f in enumerate(frags):
+        print(" Should be 1: ", np.linalg.det(Cfrags[fi].T @ S @ Cfrags2[fi]))
+    print(" ---------------------------------------------------------------- ")
 
     # Orthogonalize Fragment orbitals
     Cfrags = orbitalpartitioning.sym_ortho(Cfrags, S)
