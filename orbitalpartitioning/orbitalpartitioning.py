@@ -111,7 +111,10 @@ def canonicalize(orbital_blocks, F):
     for obi, ob in enumerate(orbital_blocks):
         fi = ob.T @ F @ ob
         fi = .5 * ( fi + fi.T )
-        e, U =  np.linalg.eig(fi)
+        e, U =  np.linalg.eigh(fi)
+        perm = e.argsort()
+        e = e[perm]
+        U = U[:,perm]
         out.append(ob @ U)
     return out
 
